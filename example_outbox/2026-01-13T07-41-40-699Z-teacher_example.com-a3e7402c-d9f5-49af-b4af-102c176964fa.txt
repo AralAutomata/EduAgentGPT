@@ -1,0 +1,27 @@
+From: Edu Assistant <noreply@local>
+To: teacher@example.com
+Subject: Class performance summary
+
+Hello,
+
+The class is showing overall progress with some students excelling notably. A few students will require extra attention to reach their potential. The goal is to build stronger reading comprehension routines and increase student confidence i
+
+Class strengths:
+- High assignment completion rate
+- Certain students showing exceptional performance
+- Steady overall progress
+- Strong dedication towards studies
+
+Students needing attention:
+- Noah Patel: Consistent lower assignment completion rate
+- Lucas Brown: Declining trend in overall performance
+- Oliver Smith: Needs improvement in class discussions
+
+Next steps (next week):
+- Introduce 5-minute exit tickets to reinforce key concepts
+- Implement peer tutoring pairs once per week
+- Focus on improving writing clarity
+- Initiate steps to enhance math fluency
+
+Best,
+Educational Assistant

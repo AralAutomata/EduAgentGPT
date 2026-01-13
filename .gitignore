@@ -1,0 +1,8 @@
+.DS_Store
+.env
+*.log
+/.deno_dir
+/vendor
+outbox/
+data/
+*.db

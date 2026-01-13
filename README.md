@@ -1,5 +1,4 @@
-# EduAgentGPT
-Agentic AI Education Assistant Workshop Project 01
+# AI Educational Assistant Agent
 
 ## Overview
 

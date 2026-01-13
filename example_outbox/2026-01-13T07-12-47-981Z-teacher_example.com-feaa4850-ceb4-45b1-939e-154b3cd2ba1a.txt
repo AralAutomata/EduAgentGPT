@@ -1,0 +1,26 @@
+From: Edu Assistant <noreply@local>
+To: teacher@example.com
+Subject: Class performance summary
+
+Hello,
+
+The class is showing promising progress overall, with a few students who may benefit from some extra support. Many pupils display an impressive level of assignment completion and are consistently engaged. Our next steps will focus on foster
+
+Class strengths:
+- High level of assignment completion
+- Positive class engagement
+- Noteworthy progress by several pupils
+
+Students needing attention:
+- Noah Patel: Shows a slight downward trend in participation and assignment completion
+- Lucas Brown: Struggles somewhat with writing clarity
+- Oliver Smith: Can benefit from additional support in math fluency
+
+Next steps (next week):
+- Implement 5-minute exit tickets to reinforce key concepts
+- Establish peer tutoring pairs once per week
+- Design extra support sessions for students who need a boost in certain areas
+- Encourage more class discussions to increase student confidence
+
+Best,
+Educational Assistant
