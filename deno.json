@@ -11,7 +11,7 @@
     "@langchain/core": "npm:@langchain/core@0.2.8"
   },
   "tasks": {
-    "start": "DENO_DIR=.deno_dir deno run --allow-read --allow-env --allow-net --allow-write --allow-ffi src/main.ts",
+    "start": "DENO_DIR=.deno_dir deno run --allow-read --allow-env --allow-net --allow-write --allow-ffi src/run_with_tool.ts",
     "test": "deno test"
   }
 }

@@ -152,6 +152,10 @@ export function parseStudentInsights(raw: string): ValidationResult<StudentInsig
 
   // STEP 6: Collect all validation errors
   const errors: string[] = [];
+
+  if (!strengthsResult.ok || !improvementResult.ok || !strategiesResult.ok) {
+    return { ok: false, errors: ["Invalid student insights payload"] };
+  }
   
   // Check each string field
   if (!positiveObservation) errors.push("positiveObservation must be a non-empty string");
@@ -263,6 +267,10 @@ export function parseTeacherInsights(raw: string): ValidationResult<TeacherInsig
   // STEP 8: Return result
   if (errors.length > 0) {
     return { ok: false, errors };
+  }
+
+  if (!strengthsResult.ok || !nextStepsResult.ok) {
+    return { ok: false, errors: ["Invalid teacher insights payload"] };
   }
 
   // Success!
