@@ -1,0 +1,31 @@
+{
+  "runId": "f28bdc59-5b56-490e-abd7-627031eb264c",
+  "createdAt": "2026-01-15T23:03:07.615Z",
+  "summary": "The class is demonstrating a strong performance overall, with a particular emphasis on assignment completion. A robust group of students are performing excellently. However, there are a few students who may need additional attention to ensu",
+  "strengths": [
+    "High assignment completion rate",
+    "Strong performance from a significant group of students",
+    "Effective comprehension of key concepts",
+    "Increasing student participation in class discussions"
+  ],
+  "attentionNeeded": [
+    {
+      "name": "Noah Patel",
+      "reason": "Shows a declining trend which may signify struggle with certain concepts"
+    },
+    {
+      "name": "Lucas Brown",
+      "reason": "Consistently low assignment completion, suggesting possible difficulties with understanding or time management"
+    },
+    {
+      "name": "Oliver Smith",
+      "reason": "Needs support in participating more actively in class discussions"
+    }
+  ],
+  "nextSteps": [
+    "Implement 5-minute exit tickets to reinforce key concepts and gauge student understanding",
+    "Encourage peer tutoring pairs once per week to promote collaborative learning",
+    "Provide additional support and resources to students needing attention",
+    "Continue to encourage and build student confidence in class discussions"
+  ]
+}

@@ -17,7 +17,9 @@ import {
   loadStudentMemory,
   loadTeacherMemory,
   saveStudentMemory,
+  saveStudentMemoryArchive,
   saveTeacherMemory,
+  saveTeacherMemoryArchive,
   updateStudentMemory,
   updateTeacherMemory,
 } from "./memory_store.ts";
@@ -224,6 +226,19 @@ async function runOnce(config: MemoryConfig, store: HistoryStore) {
       );
       // Persist memory only after a successful insights flow.
       await saveStudentMemory(config.memoryDir, updatedMemory, logger);
+      await saveStudentMemoryArchive(
+        config.memoryDir,
+        {
+          runId,
+          studentId: analysis.student.id,
+          createdAt: new Date().toISOString(),
+          summary: updatedMemory.summary,
+          strengths: updatedMemory.strengths,
+          improvementAreas: updatedMemory.improvementAreas,
+          goals: updatedMemory.goals,
+        },
+        logger,
+      );
     } catch (error) {
       logger.error("Failed to process student", {
         studentId: analysis.student.id,
@@ -288,6 +303,18 @@ async function runOnce(config: MemoryConfig, store: HistoryStore) {
     );
     // Save teacher memory after a successful summary.
     await saveTeacherMemory(config.memoryDir, updatedTeacherMemory, logger);
+    await saveTeacherMemoryArchive(
+      config.memoryDir,
+      {
+        runId,
+        createdAt: new Date().toISOString(),
+        summary: insights.classOverview,
+        strengths: insights.strengths,
+        attentionNeeded: insights.attentionNeeded,
+        nextSteps: insights.nextSteps,
+      },
+      logger,
+    );
   } catch (error) {
     logger.error("Failed to send teacher summary", {
       error: error instanceof Error ? error.message : String(error),

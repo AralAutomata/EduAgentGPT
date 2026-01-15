@@ -28,6 +28,25 @@ export interface TeacherMemory {
   history: MemoryEntry[];
 }
 
+export interface StudentMemoryArchive {
+  runId: string;
+  studentId: string;
+  createdAt: string;
+  summary: string;
+  strengths: string[];
+  improvementAreas: string[];
+  goals: string[];
+}
+
+export interface TeacherMemoryArchive {
+  runId: string;
+  createdAt: string;
+  summary: string;
+  strengths: string[];
+  attentionNeeded: Array<{ name: string; reason: string }>;
+  nextSteps: string[];
+}
+
 // Defaults guarantee a stable shape even if memory files are missing.
 const DEFAULT_STUDENT_MEMORY: StudentMemory = {
   studentId: "",
@@ -144,6 +163,55 @@ export async function saveTeacherMemory(
     logger.warn("Failed to save teacher memory", {
       error: error instanceof Error ? error.message : String(error),
     });
+  }
+}
+
+/**
+ * Persist a per-run archive snapshot for a student.
+ */
+export async function saveStudentMemoryArchive(
+  memoryDir: string,
+  archive: StudentMemoryArchive,
+  logger: Logger,
+): Promise<string | null> {
+  const archiveDir = join(memoryDir, "archive");
+  const fileName = `run-${archive.runId}-student-${archive.studentId}.json`;
+  const path = join(archiveDir, fileName);
+
+  try {
+    await Deno.mkdir(archiveDir, { recursive: true });
+    await Deno.writeTextFile(path, JSON.stringify(archive, null, 2));
+    return path;
+  } catch (error) {
+    logger.warn("Failed to save student memory archive", {
+      studentId: archive.studentId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
+/**
+ * Persist a per-run archive snapshot for the teacher summary.
+ */
+export async function saveTeacherMemoryArchive(
+  memoryDir: string,
+  archive: TeacherMemoryArchive,
+  logger: Logger,
+): Promise<string | null> {
+  const archiveDir = join(memoryDir, "archive");
+  const fileName = `run-${archive.runId}-teacher.json`;
+  const path = join(archiveDir, fileName);
+
+  try {
+    await Deno.mkdir(archiveDir, { recursive: true });
+    await Deno.writeTextFile(path, JSON.stringify(archive, null, 2));
+    return path;
+  } catch (error) {
+    logger.warn("Failed to save teacher memory archive", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
   }
 }
 
