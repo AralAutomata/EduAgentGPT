@@ -32,8 +32,11 @@ Optional configuration:
 
 - `OPENAI_MODEL` - Model selection (default: gpt-4)
 - `EMAIL_OUT_DIR` - Directory for email file output
+- `MEMORY_DIR` - Directory for per-student and teacher memory files (default: memory)
+- `MEMORY_HISTORY_LIMIT` - Number of memory history entries to retain (default: 5)
 - `STUDENTS_JSON_PATH` - Student data file path (default: students.json)
 - `TEACHER_RULES_PATH` - Teacher preferences file path
+- `HISTORY_DB_PATH` - SQLite history database path (default: data/history.db)
 - `SCHEDULE_CRON` - Cron expression for scheduling
 - `SCHEDULE_INTERVAL_MIN` - Interval in minutes (default: 30)
 - `LOG_LEVEL` - Logging verbosity: debug, info, warn, error
@@ -64,6 +67,25 @@ deno task start
 
 System executes initial analysis immediately, then runs on configured schedule. Terminate with Control-C.
 
+## Memory Mode
+
+The default `deno task start` now runs the memory-enabled pipeline. Memory is stored as JSON files so insights can reference past progress:
+
+- `memory/students/{studentId}.json`
+- `memory/teacher.json`
+
+To reset memory, delete the `memory/` directory contents.
+
+## Tool-First Validation Mode
+
+The memory pipeline also runs a LangChain tool call before analysis to validate the raw student JSON payload. The tool output is logged each cycle before filtering and analysis.
+
+If you want to run the tool-first entry point directly:
+
+```bash
+DENO_DIR=.deno_dir deno run --allow-read --allow-env --allow-net --allow-write --allow-ffi src/run_with_tool.ts
+```
+
 ## Output
 
 Student emails contain positive observations, strengths, improvement areas, actionable strategies, goals, and encouragement. Teacher summaries include class statistics, strengths, students requiring attention, and recommended actions.
@@ -80,17 +102,25 @@ Performance analysis logic resides in `src/analyzer.ts` as pure computational fu
 
 The `src/agent.ts` module encapsulates all LangChain integration for communicating with OpenAI models. It creates configured ChatOpenAI instances with appropriate parameters, defines prompt templates that structure requests for student and teacher insights, formats analysis data and teacher preferences into prompts, invokes the language model through LangChain's pipeline abstraction, and returns raw responses for validation. This abstraction layer shields the rest of the application from OpenAI API implementation details.
 
+The `src/agent_with_memory.ts` module extends the LangChain integration by injecting per-student and teacher memory into prompts. This enables longitudinal coaching that builds on prior summaries while still enforcing structured JSON responses for validation and fallback handling.
+
 Response processing occurs in `src/insights.ts` which implements defensive parsing of AI-generated content. The module extracts JSON objects from potentially verbose AI responses, validates all required fields and their types, enforces content length constraints, provides deterministic fallback logic when AI responses fail validation, and renders structured insights into human-readable text format. The fallback system uses rule-based logic to ensure students receive meaningful feedback even when AI services are unavailable or produce invalid output.
 
 Email generation is handled by `src/email.ts` which creates formatted messages for students and teachers. The module builds email content with both plain text and HTML versions, applies personalized formatting based on recipient type, simulates email delivery by saving to local files during development, and provides a clean interface for future integration with production email services.
 
 The `src/storage.ts` module implements the persistence layer using SQLite. It initializes database schema on first run, records complete metadata for each analysis cycle, stores student messages with full context including analysis data and generated insights, maintains teacher summaries with class-wide statistics, and provides methods for querying historical data. The audit trail supports debugging, analytics, and compliance requirements.
 
+The `src/memory_store.ts` module manages long-term memory files. It loads and saves JSON snapshots for each student and the teacher, keeps histories capped to a configurable length, and updates memory only after successful insight generation.
+
 Teacher preference management in `src/rules.ts` loads optional configuration from JSON files. The module reads and parses teacher preference files, validates and sanitizes preference data, provides sensible defaults when preferences are not specified, and makes preferences available to the AI agent for insight generation customization.
 
 Structured logging functionality in `src/logger.ts` provides consistent operation tracking across the system. The module implements standard log levels from debug through error, formats messages with timestamps and metadata, filters output based on configured verbosity, and routes messages to appropriate output streams based on severity.
 
 The `src/main.ts` orchestration module coordinates all components to execute the complete analysis workflow. It loads configuration from environment variables and validates required settings, initializes the database connection and AI agent, executes analysis cycles that process all students sequentially, implements error handling at multiple levels to prevent cascading failures, manages scheduling through either cron expressions or simple intervals, and provides graceful shutdown handling to ensure data integrity.
+
+The `src/main_with_memory.ts` and `src/run_with_tool.ts` entry points provide memory-aware and tool-first orchestration. Both follow the same core pipeline but add JSON memory injection and explicit validator tool invocation before analysis.
+
+The `src/tools/validate_students_tool.ts` module exposes the validator as a LangChain tool. It returns validation counts and errors as structured JSON and is invoked directly before analysis in tool-first mode.
 
 The `tests/` directory contains unit tests organized to mirror the source structure. Test files include `analyzer_test.ts` for verifying calculation accuracy, `insights_test.ts` for validating parsing logic with both valid and malformed inputs, and `validator_test.ts` for confirming data filtering behavior. Each test uses Deno's built-in testing framework with assertion functions from the standard library.
 
