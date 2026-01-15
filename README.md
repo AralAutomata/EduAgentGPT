@@ -74,7 +74,46 @@ The default `deno task start` now runs the memory-enabled pipeline. Memory is st
 - `memory/students/{studentId}.json`
 - `memory/teacher.json`
 
-To reset memory, delete the `memory/` directory contents.
+The new memory feature keeps a long‑term JSON record for each student and for the teacher, then injects that memory into
+  prompts every run so the LLM can build on prior context.
+
+  How it works end‑to‑end:
+
+  - Storage location:
+      - Per student: memory/students/{studentId}.json
+      - Teacher: memory/teacher.json
+  - Load phase:
+    At the start of each student’s analysis, the system loads their memory file (if it exists). For the teacher summary, it
+    loads the teacher memory file.
+  - Prompt injection:
+    src/agent_with_memory.ts inserts the memory JSON into the prompt so the model sees prior summaries, strengths, goals, and
+    focus areas.
+  - Update phase:
+    After a successful insight generation, memory is updated using the current insights, and written back to the JSON file.
+  - History cap:
+    Each memory file stores a short history list. MEMORY_HISTORY_LIMIT controls how many entries are retained to prevent bloat.
+
+  What gets stored (student memory):
+
+  - summary – short, consolidated note based on the latest insights
+  - strengths – top 1–3 strengths
+  - improvementAreas – top focus areas
+  - goals – recent goals
+  - history – a rolling log of recent focus/goal notes
+
+  What gets stored (teacher memory):
+
+  - summary – class‑level overview
+  - classGoals / focusAreas – retained for continuity
+  - history – recent next‑step notes
+
+  Why it’s safe:
+
+  - Memory only updates after a successful analysis and insight generation.
+  - It’s plain JSON, so it’s easy to inspect, edit, or reset.
+  - If memory is missing or invalid, the system falls back to defaults automatically.
+
+  To reset memory, delete the `memory/` directory contents.
 
 ## Tool-First Validation Mode
 
@@ -85,6 +124,31 @@ If you want to run the tool-first entry point directly:
 ```bash
 DENO_DIR=.deno_dir deno run --allow-read --allow-env --allow-net --allow-write --allow-ffi src/run_with_tool.ts
 ```
+The validation tool adds a tool-first guardrail that runs before any analysis or LLM calls.
+
+  How it works:
+
+  - Tool wrapper:
+    src/tools/validate_students_tool.ts wraps validateStudents as a LangChain tool (DynamicStructuredTool) with a strict input
+    schema.
+  - Direct invocation (no agent):
+    In src/run_with_tool.ts, the tool is always called first using validateStudentsTool.invoke({ data: rawStudents }).
+  - Logging:
+    The tool returns a JSON string containing validCount, errorCount, and errors. This is logged immediately so you can see
+    validation issues up front.
+  - Filtering:
+    The code then uses the same validator directly to filter invalid records. Only valid students continue into analysis.
+  - Fail‑safe behavior:
+    If there are zero valid students, the run is recorded as no_valid_students and the pipeline exits before calling the LLM.
+
+  Why it’s useful:
+
+  - It guarantees validation runs every cycle in a consistent, tool-shaped way.
+  - It makes validation results visible to both logs and any future tool-oriented workflows.
+  - It decouples validation from analysis so malformed data can never reach the LLM step.
+
+  In short: the tool is a mandatory gate at the start of each run, ensuring data quality and clear diagnostics before any
+  expensive LLM calls.
 
 ## Output
 
